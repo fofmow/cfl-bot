@@ -10,5 +10,5 @@ BOT_TOKEN = environ.get("BOT_TOKEN")
 
 DATABASE_URL = environ.get("DATABASE_URL")
 
-bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
+bot = Bot(token=BOT_TOKEN, parse_mode="HTML", disable_web_page_preview=True)
 dp = Dispatcher(bot, storage=MemoryStorage())
