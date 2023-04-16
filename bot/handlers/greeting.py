@@ -7,7 +7,7 @@ from storage.models import User
 from tools.texts import GREETING, INTRO
 
 
-@dp.message_handler(commands=["start"], state="*")
+@dp.message_handler(commands=["start", "home"], state="*")
 async def greet_user(message: Message, user: User, state: FSMContext):
     await state.finish()
     

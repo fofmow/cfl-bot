@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import ormar
 from ormar.queryset.queryset import QuerySet
 
@@ -20,7 +22,7 @@ class NoteReminderLevel:
 class NoteExecutor(QuerySet):
     @staticmethod
     async def get_names(user: User) -> list[str]:
-        return [note.name for note in await user.notes.all()]
+        return [note.name for note in await user.notes.filter(is_completed=False).all()]
 
 
 class Note(ormar.Model):
@@ -31,5 +33,7 @@ class Note(ormar.Model):
     name: str = ormar.String(max_length=128)
     content: str = ormar.Text()
     reminder_level = ormar.SmallInteger(default=NoteReminderLevel.LESS_19_MINUTES)
+    creation_dt = ormar.DateTime(default=datetime.utcnow)
     creator = ormar.ForeignKey(User, related_name="notes")
     category = ormar.ForeignKey(NoteCategory)
+    is_completed = ormar.Boolean(default=False)

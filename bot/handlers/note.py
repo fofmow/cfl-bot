@@ -73,7 +73,15 @@ async def save_note(call: CallbackQuery, state: FSMContext, callback_data: dict,
     )
     await call.message.edit_text(
         "<b>Заметка сохранена ✔️</b>\n\n"
-        "Первое напоминание придёт ~ через 19 минут",
+        "Первое напоминание придёт через 19 минут",
         reply_markup=user_home_buttons
     )
     await state.finish()
+
+
+@dp.callback_query_handler(text="mark_note_as_remember")
+async def start_adding_note_process(call: CallbackQuery, user: User):
+    content = call.message.text.split("\n")[-1]
+    await Note.objects.filter(content=content, creator=user).update(is_completed=True)
+    await call.message.delete_reply_markup()
+    await call.message.reply("Заметка отмечена как завершенная и больше не будет отправляться")
