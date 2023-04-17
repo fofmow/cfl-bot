@@ -15,7 +15,7 @@ async def start_adding_note_process(call: CallbackQuery, user: User):
     user_categories = await user.categories.all()
     if not user_categories:
         return await call.message.edit_text(
-            "Перед добавлением заметки необходимо создать категорию",
+            "<b>Перед добавлением заметки необходимо создать категорию</b>",
             reply_markup=user_home_buttons
         )
     await call.message.edit_text(
@@ -43,16 +43,24 @@ async def keep_note_name(message: Message, user: User, state: FSMContext):
         )
     await state.update_data(name=message.text)
     await NoteOperation.input_content.set()
-    await message.answer("Теперь введите содержание заметки")
+    await message.answer(
+        "<b>Теперь введите содержание заметки</b>",
+        reply_markup=cancel_button
+    )
 
 
 @dp.message_handler(content_types=["text"], state=NoteOperation.input_content)
 async def keep_note_content(message: Message, user: User, state: FSMContext):
+    if note := await Note.objects.get_or_none(content=message.text):
+        return await message.answer(
+            "<b>Запись с аналогичным содержанием уже добавлена ранее</b>\n\n"
+            f"Ее название — {note.name}.\nПопробуйте ввести другой текст..."
+        )
     user_categories = await user.categories.all()
     await state.update_data(content=message.text)
     await NoteOperation.input_category.set()
     await message.answer(
-        "Осталось выбрать категорию заметки",
+        "<b>Осталось выбрать категорию заметки</b>",
         reply_markup=await categories_with_id_buttons(
             user_categories, mark_as_category_cb
         )
@@ -79,7 +87,7 @@ async def save_note(call: CallbackQuery, state: FSMContext, callback_data: dict,
     await state.finish()
 
 
-@dp.callback_query_handler(text="mark_note_as_remember")
+@dp.callback_query_handler(text="mark_note_as_remember", state="*")
 async def start_adding_note_process(call: CallbackQuery, user: User):
     content = call.message.text.split("\n")[-1]
     await Note.objects.filter(content=content, creator=user).update(is_completed=True)

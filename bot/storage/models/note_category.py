@@ -18,4 +18,5 @@ class NoteCategory(ormar.Model):
     
     id: int = ormar.Integer(primary_key=True)
     name: str = ormar.String(max_length=64)
-    creator = ormar.ForeignKey(User, related_name="categories")
+    creator: User = ormar.ForeignKey(User, related_name="categories", ondelete="CASCADE")
+    

@@ -16,7 +16,7 @@ async def note_categories_page(call: CallbackQuery, user: User):
     await call.message.delete_reply_markup()
     added_category_names = await NoteCategory.objects.get_names(user)
     await call.message.edit_text(
-        "Категории еще не добавлены" if not added_category_names
+        "<b>Категории еще не добавлены</b>" if not added_category_names
         else await format_user_added_values(added_category_names)
     )
     await call.message.edit_reply_markup(reply_markup=manage_categories_buttons)
@@ -50,7 +50,7 @@ async def save_category(message: Message, user: User, state: FSMContext):
     await state.finish()
     await NoteCategory.objects.create(name=message.text, creator=user)
     await message.answer(
-        "<b>Новая категория сохранена ✔️</b>\n"
+        "<b>Новая категория сохранена ✨</b>\n"
         "Теперь к ней можно добавить заметки",
         reply_markup=manage_categories_buttons
     )
@@ -61,12 +61,13 @@ async def start_removing_category_process(call: CallbackQuery, user: User):
     user_categories = await user.categories.all()
     if not user_categories:
         return await call.message.edit_text(
-            "Категории еще не добавлены",
+            "<b>Категории еще не добавлены</b>",
             reply_markup=manage_categories_buttons
         )
     
     await call.message.edit_text(
-        "Выберите категорию, которую хотите удалить",
+        "<b>Выберите категорию, которую хотите удалить\n\n"
+        "❗️ Удаление категории приведет к потере всех связанных с ней заметок</b>",
         reply_markup=await categories_with_id_buttons(
             await user.categories.all(),
             choosing_for_removing_cb
